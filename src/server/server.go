@@ -1,20 +1,59 @@
 package main
 
-import "net"
-import "fmt"
-import "bufio"
-import "strings" // only needed below for sample processing
+import (
+  "net"
+  "fmt"
+  "bufio"
+  "strings"
+)
+// import "encoding/gob"
+
+// TODO make a struct for handling file transfers
+
+type My_Packet struct {
+  message string
+  contains_file bool
+  file_name string
+  file []byte
+}
 
 func main() {
-
-  listen()
+  listen_message()
+  //listen_packet()
   // for i := 0; i < 2; i++ {
   //   go listen()
   // }
 
 }
 
-func listen() {
+func listen_packet() {
+  fmt.Println("Launching server...")
+
+  // listen on all interfaces
+  ln, err := net.Listen("tcp", ":8081")
+  check(err, "Server is ready.")
+
+  for {
+    conn, _ := ln.Accept()
+    check(err, "Accepted connection.")
+
+    go func() {
+      // dec := gob.NewDecoder(conn)
+      // p := &My_Packet{}
+      // dec.Decode(p)
+      //
+      // fmt.Println("Message: %s", p.message)
+      //
+      // // send new string back to client
+      // conn.Write([]byte("Message Recieved: " + p.message + "\n"))
+      conn.Write([]byte("liftoff" + "\n"))
+      return
+    }()
+  }
+
+}
+
+func listen_message() {
   fmt.Println("Launching server...")
 
   // listen on all interfaces
