@@ -11,24 +11,25 @@ import (
 )
 //
 
-type My_Packet struct {
-  message string
-  contains_file bool
-  file_name string
-  file []byte
+type my_packet struct {
+  Message string
+  Contains_file bool
+  File_name string
+  File []byte
 }
 
 
 func main() {
-  dial_server_message()
+  //dial_server_message()
 
   p := form_packet("hello", "./../../storage/sent/numbers.in")
+
   // connect to this socket
   dial_server_packet(p)
-
+  fmt.Println(p.Message)
 }
 
-func dial_server_packet(packet My_Packet) {
+func dial_server_packet(packet my_packet) {
   conn, err := net.Dial("tcp", "127.0.0.1:8081")
 
   if err != nil {
@@ -37,7 +38,8 @@ func dial_server_packet(packet My_Packet) {
   }
 
   encoder := gob.NewEncoder(conn)
-  encoder.Encode(packet)
+  err = encoder.Encode(packet)
+  check_err(err, "everything is fine")
   conn.Close()
 
   message, _ := bufio.NewReader(conn).ReadString('\n')
@@ -62,15 +64,15 @@ func dial_server_message() {
   }
 }
 
-func form_packet(message, file_path string) My_Packet {
+func form_packet(message, file_path string) my_packet {
   file_exists := check_for_file(file_path)
   if file_exists {
     file, err := ioutil.ReadFile(file_path)
     file_name := filepath.Base(file_path)
     check_err(err, "")
-    return My_Packet{message, file_exists, file_name, file}
+    return my_packet{message, file_exists, file_name, file}
   } else {
-    return My_Packet{message, file_exists, "", nil}
+    return my_packet{message, file_exists, "", nil}
   }
 
 }

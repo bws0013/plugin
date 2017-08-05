@@ -6,50 +6,66 @@ import (
   "bufio"
   "strings"
 )
-// import "encoding/gob"
+import "encoding/gob"
 
 // TODO make a struct for handling file transfers
 
-type My_Packet struct {
-  message string
-  contains_file bool
-  file_name string
-  file []byte
+type my_packet struct {
+  Message string
+  Contains_file bool
+  File_name string
+  File []byte
 }
 
 func main() {
-  listen_message()
+  //listen_message()
   //listen_packet()
   // for i := 0; i < 2; i++ {
   //   go listen()
   // }
 
-}
-
-func listen_packet() {
   fmt.Println("Launching server...")
-
-  // listen on all interfaces
   ln, err := net.Listen("tcp", ":8081")
   check(err, "Server is ready.")
-
   for {
-    conn, _ := ln.Accept()
+    conn, err := ln.Accept()
     check(err, "Accepted connection.")
+    go listen_packet(conn) // a goroutine handles conn so that the loop can accept other connections
+  }
 
-    go func() {
+}
+
+func listen_packet(conn net.Conn) {
+
+  // dec := gob.NewDecoder(conn)
+  //   p := &P{}
+  //   dec.Decode(p)
+  //   fmt.Printf("Received : %+v", p);
+  //   conn.Close()
+
+  dec := gob.NewDecoder(conn)
+  p := &my_packet{}
+  err := dec.Decode(p)
+  check(err, "No problems on read in")
+
+  fmt.Println("Message: %s", p.File_name)
+
+
+  if dec != nil {
+    fmt.Printf("Client disconnected.\n")
+    return
+  }
+
+  // conn.Write([]byte("liftoff" + "\n"))
+
       // dec := gob.NewDecoder(conn)
-      // p := &My_Packet{}
+      // p := &my_packet{}
       // dec.Decode(p)
       //
       // fmt.Println("Message: %s", p.message)
       //
       // // send new string back to client
       // conn.Write([]byte("Message Recieved: " + p.message + "\n"))
-      conn.Write([]byte("liftoff" + "\n"))
-      return
-    }()
-  }
 
 }
 
