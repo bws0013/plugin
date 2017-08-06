@@ -18,21 +18,18 @@ type my_packet struct {
 }
 
 func main() {
-  //listen_message()
-  //listen_packet()
-  // for i := 0; i < 2; i++ {
-  //   go listen()
-  // }
-
-  fmt.Println("Launching server...")
+  fmt.Println("start");
   ln, err := net.Listen("tcp", ":8081")
-  check(err, "Server is ready.")
+  check_err(err, "Listening!")
+
   for {
-    conn, err := ln.Accept()
-    check(err, "Accepted connection.")
+    conn, err := ln.Accept() // this blocks until connection or error
+    if err != nil {
+        fmt.Println("This connection needs a tissue, skipping!")
+        continue
+    }
     go listen_packet(conn) // a goroutine handles conn so that the loop can accept other connections
   }
-
 }
 
 func listen_packet(conn net.Conn) {
@@ -46,10 +43,11 @@ func listen_packet(conn net.Conn) {
   dec := gob.NewDecoder(conn)
   p := &my_packet{}
   err := dec.Decode(p)
-  check(err, "No problems on read in")
+  check_err(err, "Decoding")
 
-  fmt.Println("Message: %s", p.File_name)
+  fmt.Printf("Message: %s\n", p.File_name)
 
+  conn.Close()
 
   if dec != nil {
     fmt.Printf("Client disconnected.\n")
@@ -74,12 +72,12 @@ func listen_message() {
 
   // listen on all interfaces
   ln, err := net.Listen("tcp", ":8081")
-  check(err, "Server is ready.")
+  check_err(err, "Server is ready.")
 
   // run loop forever (or until ctrl-c)
   for {
     conn, _ := ln.Accept()
-    check(err, "Accepted connection.")
+    check_err(err, "Accepted connection.")
 
     go func() {
       // will listen for message to process ending in newline (\n)
@@ -103,7 +101,7 @@ func listen_message() {
   }
 }
 
-func check(err error, message string) {
+func check_err(err error, message string) {
     if err != nil {
         panic(err)
     }
