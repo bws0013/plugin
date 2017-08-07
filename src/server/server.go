@@ -5,10 +5,11 @@ import (
   "fmt"
   "bufio"
   "strings"
+  "io/ioutil"
 )
 import "encoding/gob"
 
-// TODO make a struct for handling file transfers
+// TODO add permissions as an element passed in the packet
 
 type my_packet struct {
   Message string
@@ -26,10 +27,10 @@ func main() {
 
   fmt.Println("Launching server...")
   ln, err := net.Listen("tcp", ":8081")
-  check(err, "Server is ready.")
+  check_err(err, "Server is ready.")
   for {
     conn, err := ln.Accept()
-    check(err, "Accepted connection.")
+    check_err(err, "Accepted connection.")
     go listen_packet(conn) // a goroutine handles conn so that the loop can accept other connections
   }
 
@@ -46,7 +47,7 @@ func listen_packet(conn net.Conn) {
   dec := gob.NewDecoder(conn)
   p := &my_packet{}
   err := dec.Decode(p)
-  check(err, "No problems on read in")
+  check_err(err, "No problems on read in")
 
   fmt.Println("Message: %s", p.File_name)
 
@@ -74,12 +75,12 @@ func listen_message() {
 
   // listen on all interfaces
   ln, err := net.Listen("tcp", ":8081")
-  check(err, "Server is ready.")
+  check_err(err, "Server is ready.")
 
   // run loop forever (or until ctrl-c)
   for {
     conn, _ := ln.Accept()
-    check(err, "Accepted connection.")
+    check_err(err, "Accepted connection.")
 
     go func() {
       // will listen for message to process ending in newline (\n)
@@ -103,7 +104,14 @@ func listen_message() {
   }
 }
 
-func check(err error, message string) {
+func create_file(name string, data []byte) {
+  //permissions := int(0644)
+  full_name := "./../../storage/recieved/" + name
+  err := ioutil.WriteFile(full_name, data, 0644)
+  check_err(err, "File created!")
+}
+
+func check_err(err error, message string) {
     if err != nil {
         panic(err)
     }

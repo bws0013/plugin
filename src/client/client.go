@@ -42,8 +42,8 @@ func dial_server_packet(packet my_packet) {
   check_err(err, "everything is fine")
   conn.Close()
 
-  message, _ := bufio.NewReader(conn).ReadString('\n')
-  fmt.Println("Message from server: " + message)
+  //message, _ := bufio.NewReader(conn).ReadString('\n')
+  //fmt.Println("Message from server: " + message)
 
 
 }
