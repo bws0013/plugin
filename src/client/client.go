@@ -38,7 +38,7 @@ func dial_server_packet(packet my_packet) {
   }
 
   encoder := gob.NewEncoder(conn)
-  err = encoder.Encode(packet)
+  err = encoder.Encode(&packet)
   check_err(err, "everything is fine")
   conn.Close()
 
