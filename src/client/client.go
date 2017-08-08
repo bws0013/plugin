@@ -15,8 +15,8 @@ type my_packet struct {
   Message string
   Contains_file bool
   File_name string
+  Permissions uint
   File []byte
-  permissions os.FileMode
 }
 
 
@@ -36,7 +36,7 @@ func dial_server_packet(packet my_packet) {
     fmt.Println("Unable to send!")
     return
   }
-
+  fmt.Println(packet)
   encoder := gob.NewEncoder(conn)
   err = encoder.Encode(&packet)
 
@@ -57,14 +57,15 @@ func form_packet(message, file_path string) my_packet {
 
     fileInfo, err := os.Stat(file_path)
 
-    var mode os.FileMode
-    if err == nil { mode = fileInfo.Mode() }
+    var mode uint
+    if err == nil { mode = uint(fileInfo.Mode()) }
 
     file_name := filepath.Base(file_path)
-    
-    return my_packet{message, file_exists, file_name, file, mode}
+
+    return my_packet{message, file_exists, file_name, mode, file}
   } else {
-    return my_packet{message, file_exists, "", nil, 0000}
+    fmt.Println("No file included")
+    return my_packet{message, file_exists, "", 0000, nil}
   }
 
 }
@@ -82,7 +83,6 @@ func check_for_file(file_path string) bool {
   finfo, err := os.Stat(file_path)
   check_err(err, "")
   if !finfo.IsDir() {
-    //fmt.Println(file_path)
     return true
   }
   return false

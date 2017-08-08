@@ -14,8 +14,8 @@ type my_packet struct {
   Message string
   Contains_file bool
   File_name string
+  Permissions uint
   File []byte
-  permissions os.FileMode
 }
 
 func main() {
@@ -46,6 +46,8 @@ func listen_packet(conn net.Conn) {
   err := dec.Decode(p)
   check_err(err, "No problems on read in")
 
+  fmt.Println(p)
+
   conn.Write([]byte("liftoff"))
 
   conn.Close()
@@ -53,7 +55,7 @@ func listen_packet(conn net.Conn) {
   fmt.Printf("Message: %s\n", p.File_name)
 
   if p.Contains_file && p.File != nil {
-    create_file(p.File_name, p.File, p.permissions)
+    create_file(p.File_name, p.File, p.Permissions)
   } else {
     fmt.Println("No file detected!")
   }
@@ -64,22 +66,11 @@ func listen_packet(conn net.Conn) {
     return
   }
 
-
-
-      // dec := gob.NewDecoder(conn)
-      // p := &my_packet{}
-      // dec.Decode(p)
-      //
-      // fmt.Println("Message: %s", p.message)
-      //
-      // // send new string back to client
-      // conn.Write([]byte("Message Recieved: " + p.message + "\n"))
-
 }
 
-func create_file(name string, data []byte, permissions os.FileMode) {
+func create_file(name string, data []byte, permissions uint) {
   full_name := "./../../storage/recieved/" + name
-  err := ioutil.WriteFile(full_name, data, permissions)
+  err := ioutil.WriteFile(full_name, data, os.FileMode(permissions))
   check_err(err, "File created!")
 }
 
