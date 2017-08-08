@@ -3,9 +3,8 @@ package main
 import (
   "net"
   "fmt"
-  "bufio"
-  "strings"
   "io/ioutil"
+  "os"
 )
 import "encoding/gob"
 
@@ -46,9 +45,16 @@ func listen_packet(conn net.Conn) {
   err := dec.Decode(p)
   check_err(err, "No problems on read in")
 
+  conn.Close()
+
   fmt.Printf("Message: %s\n", p.File_name)
 
-  conn.Close()
+  if p.Contains_file && p.File != nil {
+    create_file(p.File_name, p.File)
+  } else {
+    fmt.Println("No file detected!")
+  }
+
 
   if dec != nil {
     fmt.Printf("Client disconnected.\n")
@@ -68,44 +74,10 @@ func listen_packet(conn net.Conn) {
 
 }
 
-func listen_message() {
-  fmt.Println("Launching server...")
-
-  // listen on all interfaces
-  ln, err := net.Listen("tcp", ":8081")
-  check_err(err, "Server is ready.")
-
-  // run loop forever (or until ctrl-c)
-  for {
-    conn, _ := ln.Accept()
-    check_err(err, "Accepted connection.")
-
-    go func() {
-      // will listen for message to process ending in newline (\n)
-      buf := bufio.NewReader(conn)
-
-      for {
-        message, err := buf.ReadString('\n')
-        if err != nil {
-          fmt.Printf("Client disconnected.\n")
-          break
-        }
-
-        // output message received
-        fmt.Print("Message Received:", string(message))
-        // sample process for string received
-        newmessage := strings.ToUpper(message)
-        // send new string back to client
-        conn.Write([]byte(newmessage + "\n"))
-      }
-    }()
-  }
-}
-
 func create_file(name string, data []byte) {
-  //permissions := int(0644)
+  permissions := os.FileMode(0644)
   full_name := "./../../storage/recieved/" + name
-  err := ioutil.WriteFile(full_name, data, 0644)
+  err := ioutil.WriteFile(full_name, data, permissions)
   check_err(err, "File created!")
 }
 
