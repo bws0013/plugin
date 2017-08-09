@@ -8,10 +8,12 @@ import (
   "path/filepath"
   "encoding/gob"
   "bufio"
+  "time"
 )
 //
 
 type my_packet struct {
+  Current_time string
   Message string
   Contains_file bool
   File_name string
@@ -36,7 +38,7 @@ func dial_server_packet(packet my_packet) {
     fmt.Println("Unable to send!")
     return
   }
-  fmt.Println(packet)
+  // fmt.Println(packet)
   encoder := gob.NewEncoder(conn)
   err = encoder.Encode(&packet)
 
@@ -52,6 +54,8 @@ func dial_server_packet(packet my_packet) {
 
 func form_packet(message, file_path string) my_packet {
   file_exists := check_for_file(file_path)
+
+  current_time := time.Now().Format(time.RFC3339)
   if file_exists {
     file, err := ioutil.ReadFile(file_path)
 
@@ -62,10 +66,10 @@ func form_packet(message, file_path string) my_packet {
 
     file_name := filepath.Base(file_path)
 
-    return my_packet{message, file_exists, file_name, mode, file}
+    return my_packet{current_time, message, file_exists, file_name, mode, file}
   } else {
     fmt.Println("No file included")
-    return my_packet{message, file_exists, "", 0000, nil}
+    return my_packet{current_time, message, file_exists, "", 0000, nil}
   }
 
 }
@@ -81,7 +85,9 @@ func check_err(err error, message string) {
 
 func check_for_file(file_path string) bool {
   finfo, err := os.Stat(file_path)
-  check_err(err, "")
+  if err != nil {
+    return false
+  }
   if !finfo.IsDir() {
     return true
   }

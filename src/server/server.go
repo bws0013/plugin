@@ -8,9 +8,8 @@ import (
 )
 import "encoding/gob"
 
-// TODO add permissions as an element passed in the packet
-
 type my_packet struct {
+  Current_time string
   Message string
   Contains_file bool
   File_name string
@@ -59,7 +58,6 @@ func listen_packet(conn net.Conn) {
   } else {
     fmt.Println("No file detected!")
   }
-
 
   if dec != nil {
     fmt.Printf("Client disconnected.\n")
