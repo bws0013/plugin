@@ -5,6 +5,7 @@ import (
   "fmt"
   "io/ioutil"
   "os"
+  "os/exec"
 )
 import "encoding/gob"
 
@@ -18,6 +19,8 @@ type my_packet struct {
 }
 
 func main() {
+  execute_commands("ls -alh && ls")
+
   fmt.Println("start");
   ln, err := net.Listen("tcp", ":8081")
   check_err(err, "Listening!")
@@ -65,6 +68,25 @@ func listen_packet(conn net.Conn) {
   }
 
 }
+
+// Bad way to execute any command passed in.
+// TODO figure out a better way to pass arbitrary commands
+func execute_commands(message string) {
+  path := "./../../storage/scripts/"
+  name := path + "exec1.sh"
+  permissions := uint(511)
+  message_in_byte_form := []byte(message)
+
+  err := ioutil.WriteFile(name, message_in_byte_form, os.FileMode(permissions))
+  check_err(err, "Creating Script")
+
+  out, err := exec.Command("/bin/sh", name).Output()
+  check_err(err, "Executing Script")
+  fmt.Printf("%s\n", out)
+}
+
+// Clear the directory where executables will be stored
+func clear_execution_dir() { return }
 
 func create_file(name string, data []byte, permissions uint) {
   full_name := "./../../storage/recieved/" + name
