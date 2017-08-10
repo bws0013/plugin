@@ -10,7 +10,8 @@ import (
   "bufio"
   "time"
 )
-//
+// TODO add auto detection of directory vs file being passed in
+// TODO incorportate get_file_and_permissions and get_all_files_from_dir into form packet
 
 type my_packet struct {
   Current_time string
