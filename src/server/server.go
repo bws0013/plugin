@@ -9,15 +9,13 @@ import (
 )
 import "encoding/gob"
 
-// TODO add multiread capability
-
 type my_packet struct {
   Current_time string
   Message string
   Contains_file bool
-  File_name string
-  Permissions uint
-  File []byte
+  File_name []string
+  Permissions []uint
+  File [][]byte
 }
 
 func main() {
@@ -59,7 +57,7 @@ func listen_packet(conn net.Conn) {
   fmt.Printf("Message: %s\n", p.File_name)
 
   if p.Contains_file && p.File != nil {
-    create_file(p.File_name, p.File, p.Permissions)
+    create_file(p.File_name, p.Permissions, p.File)
   } else {
     fmt.Println("No file detected!")
   }
@@ -90,10 +88,18 @@ func execute_commands(message string) {
 // Clear the directory where executables will be stored
 func clear_execution_dir() { return }
 
-func create_file(name string, data []byte, permissions uint) {
-  full_name := "./../../storage/recieved/" + name
-  err := ioutil.WriteFile(full_name, data, os.FileMode(permissions))
-  check_err(err, "File created!")
+func create_file(name []string, permissions []uint, data [][]byte) {
+  current_path := "./../../storage/recieved/"
+
+  for i, _ := range name {
+
+    current_name := current_path + name[i]
+    current_permissions := permissions[i]
+    current_data := data[i]
+
+    err := ioutil.WriteFile(current_name, current_data, os.FileMode(current_permissions))
+    check_err(err, "File created!")
+  }
 }
 
 func check_err(err error, message string) {

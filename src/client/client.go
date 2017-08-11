@@ -26,14 +26,16 @@ func main() {
 
   fmt.Println(get_all_files_from_dir("./../../storage/sent/"))
 
-  p := form_packet("hello", "./../../storage/sent/numbers.in2")
+  p := form_packet("hello", "./../../storage/sent/numbers.in")
   p2 := form_packet("hello", "./../../storage/sent/")
 
-  fmt.Println(p)
-  fmt.Println(p2)
+  if true != true {
+    fmt.Println(p)
+    fmt.Println(p2)
+  }
 
   // connect to this socket
-  dial_server_packet(p)
+  dial_server_packet(p2)
 }
 
 func dial_server_packet(packet my_packet) {
@@ -63,6 +65,8 @@ func form_packet(message, file_path string) my_packet {
   file_exists := check_for_file(file_path)
   dir_exists := check_for_dir(file_path)
 
+  something_exists := file_exists || dir_exists
+
   var all_names []string
   var all_permissions []uint
   var all_files_text [][]byte
@@ -90,7 +94,8 @@ func form_packet(message, file_path string) my_packet {
     fmt.Println("Error Reading File/Dir, Returning empty packet")
   }
 
-  return my_packet{current_time, message, file_exists, all_names, all_permissions, all_files_text}
+
+  return my_packet{current_time, message, something_exists, all_names, all_permissions, all_files_text}
 
 }
 
