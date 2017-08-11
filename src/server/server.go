@@ -9,6 +9,11 @@ import (
 )
 import "encoding/gob"
 
+// TODO add logging feature
+// TODO create log directory and ability to export it
+// TODO create time based files for input
+// TODO check for redundant/unused methods
+
 type my_packet struct {
   Current_time string
   Message string

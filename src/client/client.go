@@ -11,6 +11,8 @@ import (
   "time"
 )
 
+// TODO check for redundant/unused methods
+
 type my_packet struct {
   Current_time string
   Message string
