@@ -9,6 +9,8 @@ import (
 )
 import "encoding/gob"
 
+// TODO add multiread capability
+
 type my_packet struct {
   Current_time string
   Message string
