@@ -91,7 +91,16 @@ func execute_commands(message string) {
 }
 
 // Clear the directory where executables will be stored
-func clear_execution_dir() { return }
+func clear_execution_dir() {
+  to_delete := "./../../storage/recieved/"
+
+  if !check_for_dir(to_delete) {
+    return
+  }
+
+  // Delete files
+
+}
 
 func create_file(name []string, permissions []uint, data [][]byte) {
   current_path := "./../../storage/recieved/"
@@ -105,6 +114,17 @@ func create_file(name []string, permissions []uint, data [][]byte) {
     err := ioutil.WriteFile(current_name, current_data, os.FileMode(current_permissions))
     check_err(err, "File created!")
   }
+}
+
+func check_for_dir(file_path string) bool {
+  finfo, err := os.Stat(file_path)
+  if err != nil {
+    return false
+  }
+  if finfo.IsDir() {
+    return true
+  }
+  return false
 }
 
 func check_err(err error, message string) {

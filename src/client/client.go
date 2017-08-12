@@ -12,6 +12,7 @@ import (
 )
 
 // TODO check for redundant/unused methods
+// TODO compare current method of getting file to just using os.Open
 
 type my_packet struct {
   Current_time string
