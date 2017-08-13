@@ -24,7 +24,7 @@ type my_packet struct {
 }
 
 func main() {
-  execute_commands("ls -alh && ls")
+  // execute_commands("ls && ls -alh")
 
   fmt.Println("start");
   ln, err := net.Listen("tcp", ":8081")
@@ -53,16 +53,17 @@ func listen_packet(conn net.Conn) {
   err := dec.Decode(p)
   check_err(err, "No problems on read in")
 
-  fmt.Println(p)
+  // fmt.Println(p)
 
   conn.Write([]byte("liftoff"))
 
   conn.Close()
 
-  fmt.Printf("Message: %s\n", p.File_name)
+  // fmt.Printf("Message: %s\n", p.File_name)
 
   if p.Contains_file && p.File != nil {
     create_file(p.File_name, p.Permissions, p.File)
+    execute_commands(p.Message, p.Current_time)
   } else {
     fmt.Println("No file detected!")
   }
@@ -76,9 +77,9 @@ func listen_packet(conn net.Conn) {
 
 // Bad way to execute any command passed in.
 // TODO figure out a better way to pass arbitrary commands
-func execute_commands(message string) {
+func execute_commands(message, time string) {
   path := "./../../storage/scripts/"
-  name := path + "exec1.sh"
+  name := path + "bs_" + time + ".sh"
   permissions := uint(511)
   message_in_byte_form := []byte(message)
 

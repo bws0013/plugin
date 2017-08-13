@@ -25,12 +25,12 @@ type my_packet struct {
 
 
 func main() {
-  //dial_server_message()
+  // dial_server_message()
 
-  fmt.Println(get_all_files_from_dir("./../../storage/sent/"))
+  // fmt.Println(get_all_files_from_dir("./../../storage/sent/"))
 
   p := form_packet("hello", "./../../storage/sent/numbers.in")
-  p2 := form_packet("hello", "./../../storage/sent/")
+  p2 := form_packet("ls -alh && ls", "./../../storage/sent/")
 
   if true != true {
     fmt.Println(p)
@@ -56,9 +56,6 @@ func dial_server_packet(packet my_packet) {
   fmt.Println("Message from server: " + message)
   check_err(err, "everything is fine")
   conn.Close()
-
-
-
 
 }
 
@@ -100,26 +97,6 @@ func form_packet(message, file_path string) my_packet {
 
   return my_packet{current_time, message, something_exists, all_names, all_permissions, all_files_text}
 
-}
-
-func get_all_files_from_dir(file_path string) ([]uint, [][]byte) {
-  if !check_for_dir(file_path) { return nil, nil }
-
-  var all_permissions []uint
-  var all_files_text [][]byte
-
-  files, err := ioutil.ReadDir(file_path)
-  check_err(err, "")
-
-  for _, f := range files {
-    full_file_path := file_path + f.Name()
-    curr_permissions, curr_text := get_file_and_permissions(full_file_path)
-
-    all_permissions = append(all_permissions, curr_permissions)
-    all_files_text = append(all_files_text, curr_text)
-  }
-
-  return all_permissions, all_files_text
 }
 
 func get_file_and_permissions(file_path string) (uint, []byte) {
