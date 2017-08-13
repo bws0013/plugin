@@ -6,17 +6,18 @@ import (
   "io/ioutil"
   "os"
   "os/exec"
+  "strings"
 )
 import "encoding/gob"
 
 // TODO add logging feature
 // TODO create log directory and ability to export it
-// TODO create time based files for input
 // TODO check for redundant/unused methods
 
 type my_packet struct {
   Current_time string
   Message string
+  Commands string
   Contains_file bool
   File_name []string
   Permissions []uint
@@ -42,12 +43,6 @@ func main() {
 
 func listen_packet(conn net.Conn) {
 
-  // dec := gob.NewDecoder(conn)
-  //   p := &P{}
-  //   dec.Decode(p)
-  //   fmt.Printf("Received : %+v", p);
-  //   conn.Close()
-
   dec := gob.NewDecoder(conn)
   p := &my_packet{}
   err := dec.Decode(p)
@@ -59,11 +54,9 @@ func listen_packet(conn net.Conn) {
 
   conn.Close()
 
-  // fmt.Printf("Message: %s\n", p.File_name)
-
   if p.Contains_file && p.File != nil {
     create_file(p.File_name, p.Permissions, p.File)
-    execute_commands(p.Message, p.Current_time)
+    execute_commands(p.Commands, p.Current_time)
   } else {
     fmt.Println("No file detected!")
   }
@@ -77,11 +70,11 @@ func listen_packet(conn net.Conn) {
 
 // Bad way to execute any command passed in.
 // TODO figure out a better way to pass arbitrary commands
-func execute_commands(message, time string) {
+func execute_commands(commands, time string) {
   path := "./../../storage/scripts/"
   name := path + "bs_" + time + ".sh"
   permissions := uint(511)
-  message_in_byte_form := []byte(message)
+  message_in_byte_form := []byte(commands)
 
   err := ioutil.WriteFile(name, message_in_byte_form, os.FileMode(permissions))
   check_err(err, "Creating Script")
@@ -92,11 +85,21 @@ func execute_commands(message, time string) {
 }
 
 // Clear the directory where executables will be stored
-func clear_execution_dir() {
-  to_delete := "./../../storage/recieved/"
+func clear_scripts_dir() {
+  file_path := "./../../storage/scripts/"
 
-  if !check_for_dir(to_delete) {
-    return
+  if !check_for_dir(file_path) { return }
+
+  files, err := ioutil.ReadDir(file_path)
+  check_err(err, "Getting recieved file names")
+
+  for _, file_name := range files {
+    fmt.Println(file_path + file_name.Name())
+    if strings.HasPrefix(file_name.Name(), "bs_") {
+      err = os.Remove(file_path + file_name.Name())
+      check_err(err, "Removing file: " + file_name.Name())
+    }
+
   }
 
   // Delete files

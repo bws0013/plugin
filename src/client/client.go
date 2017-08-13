@@ -11,12 +11,12 @@ import (
   "time"
 )
 
-// TODO check for redundant/unused methods
 // TODO compare current method of getting file to just using os.Open
 
 type my_packet struct {
   Current_time string
   Message string
+  Commands string
   Contains_file bool
   File_name []string
   Permissions []uint
@@ -25,12 +25,15 @@ type my_packet struct {
 
 
 func main() {
-  // dial_server_message()
+
+  reader := bufio.NewReader(os.Stdin)
+  fmt.Print("Enter text: ")
+  text, _ := reader.ReadString('\n')
 
   // fmt.Println(get_all_files_from_dir("./../../storage/sent/"))
 
-  p := form_packet("hello", "./../../storage/sent/numbers.in")
-  p2 := form_packet("ls -alh && ls", "./../../storage/sent/")
+  p := form_packet("hello", "sleep 10 && echo done", "./../../storage/sent/numbers.in")
+  p2 := form_packet("hello_1", "ls -alh && ls","./../../storage/sent/")
 
   if true != true {
     fmt.Println(p)
@@ -38,11 +41,17 @@ func main() {
   }
 
   // connect to this socket
-  dial_server_packet(p2)
+  if text == "1\n" {
+    dial_server_packet(p)
+  }
+  if text == "2\n" {
+    dial_server_packet(p2)
+  }
+
 }
 
 func dial_server_packet(packet my_packet) {
-  conn, err := net.Dial("tcp", "192.168.1.5:8081")
+  conn, err := net.Dial("tcp", "127.0.0.1:8081")
 
   if err != nil {
     fmt.Println("Unable to send!")
@@ -59,7 +68,7 @@ func dial_server_packet(packet my_packet) {
 
 }
 
-func form_packet(message, file_path string) my_packet {
+func form_packet(message, commands, file_path string) my_packet {
   current_time := time.Now().Format(time.RFC3339)
 
   file_exists := check_for_file(file_path)
@@ -95,7 +104,7 @@ func form_packet(message, file_path string) my_packet {
   }
 
 
-  return my_packet{current_time, message, something_exists, all_names, all_permissions, all_files_text}
+  return my_packet{current_time, message, commands, something_exists, all_names, all_permissions, all_files_text}
 
 }
 
