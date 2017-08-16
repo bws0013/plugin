@@ -10,7 +10,6 @@ import (
 )
 import "encoding/gob"
 
-// TODO add logging feature
 // TODO create log directory and ability to export it
 // TODO check for redundant/unused methods
 
@@ -82,11 +81,11 @@ func execute_commands(commands, time string) {
   message_in_byte_form := []byte(commands)
 
   err := ioutil.WriteFile(name, message_in_byte_form, os.FileMode(permissions))
-  check_err(err, "Creating Script", time)
+  check_err(err, commands, time)
 
   out, err := exec.Command("/bin/sh", name).Output()
-  check_err(err, "Executing Script", time)
-  fmt.Printf("%s\n", out)
+  check_err(err, string(out), time)
+  // fmt.Printf("%s\n", out)
 }
 
 // Clear the directory where executables will be stored
@@ -137,7 +136,7 @@ func check_for_dir(file_path string) bool {
 }
 
 func check_err(err error, message, time string) {
-  log_file_name := "bs_" + time + ".txt"
+  log_file_name := "./../../storage/logs/bs_" + time + ".txt"
   message += "\n"
   f, err := os.OpenFile(log_file_name, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
   if err != nil {
