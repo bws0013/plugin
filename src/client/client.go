@@ -11,7 +11,7 @@ import (
   "time"
 )
 
-// TODO compare current method of getting file to just using os.Open
+// TODO incorporate this https://medium.com/@lhartikk/a-blockchain-in-200-lines-of-code-963cc1cc0e54
 
 type my_packet struct {
   Current_time string
