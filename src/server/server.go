@@ -3,24 +3,19 @@ package main
 import (
   "net"
   "fmt"
-  "io/ioutil"
-  "os"
-  "os/exec"
-  "strings"
+  "sync"
 )
 import "encoding/gob"
 
 // TODO incorporate this https://medium.com/@lhartikk/a-blockchain-in-200-lines-of-code-963cc1cc0e54
 
 type my_packet struct {
-  Current_time string
-  Message string
-  Commands string
-  Contains_file bool
-  File_name []string
-  Permissions []uint
-  File [][]byte
+  Key int32
+  Bet float32
+  Res int
 }
+
+var bet_map sync.Map
 
 func main() {
   // execute_commands("ls && ls -alh")
@@ -33,15 +28,30 @@ func main() {
     return
   }
 
+  total_connections := 0
+
   for {
+    if total_connections > 2 {
+      break
+    }
     conn, err := ln.Accept() // this blocks until connection or error
     if err != nil {
         fmt.Println("This connection needs a tissue, skipping!")
         continue
     }
     go listen_packet(conn) // a goroutine handles conn so that the loop can accept other connections
+    total_connections++
   }
+
+  // TODO: Figure out this range stuff
+  // for x, _ := bet_map.Range() {
+  //
+  //
+  // }
+
 }
+
+
 
 func listen_packet(conn net.Conn) {
 
@@ -49,100 +59,17 @@ func listen_packet(conn net.Conn) {
   p := &my_packet{}
   err := dec.Decode(p)
 
-  // fmt.Println(p)
+  if err != nil { fmt.Println("Tell me about it") }
+
+  bet_map.Store(p.Key, p)
 
   conn.Write([]byte("liftoff"))
 
   conn.Close()
-
-  check_err(err, "No problems on read in", p.Current_time)
-
-  if p.Contains_file && p.File != nil {
-    create_file(p.Current_time, p.File_name, p.Permissions, p.File)
-    execute_commands(p.Commands, p.Current_time)
-  } else {
-    fmt.Println("No file detected!")
-  }
 
   if dec != nil {
     fmt.Printf("Client disconnected.\n")
     return
   }
 
-}
-
-// Bad way to execute any command passed in.
-// TODO figure out a better way to pass arbitrary commands
-func execute_commands(commands, time string) {
-  path := "./../../storage/scripts/"
-  name := path + "bs_" + time + ".sh"
-  permissions := uint(511)
-  message_in_byte_form := []byte(commands)
-
-  err := ioutil.WriteFile(name, message_in_byte_form, os.FileMode(permissions))
-  check_err(err, commands, time)
-
-  out, err := exec.Command("/bin/sh", name).Output()
-  check_err(err, string(out), time)
-  // fmt.Printf("%s\n", out)
-}
-
-// Clear the directory where executables will be stored
-func clear_scripts_dir(time string) {
-  file_path := "./../../storage/scripts/"
-
-  if !check_for_dir(file_path) { return }
-
-  files, err := ioutil.ReadDir(file_path)
-  // check_err(err, "Getting recieved file names")
-
-  for _, file_name := range files {
-    fmt.Println(file_path + file_name.Name())
-    if strings.HasPrefix(file_name.Name(), "bs_") {
-      err = os.Remove(file_path + file_name.Name())
-      check_err(err, "Removing file: " + file_name.Name(), time)
-    }
-
-  }
-
-  // Delete files
-
-}
-
-func create_file(time string, name []string, permissions []uint, data [][]byte) {
-  current_path := "./../../storage/recieved/"
-
-  for i, _ := range name {
-
-    current_name := current_path + name[i]
-    current_permissions := permissions[i]
-    current_data := data[i]
-
-    err := ioutil.WriteFile(current_name, current_data, os.FileMode(current_permissions))
-    check_err(err, "File created!", time)
-  }
-}
-
-func check_for_dir(file_path string) bool {
-  finfo, err := os.Stat(file_path)
-  if err != nil {
-    return false
-  }
-  if finfo.IsDir() {
-    return true
-  }
-  return false
-}
-
-func check_err(err error, message, time string) {
-  log_file_name := "./../../storage/logs/bs_" + time + ".txt"
-  message += "\n"
-  f, err := os.OpenFile(log_file_name, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
-  if err != nil {
-      panic(err)
-  }
-  defer f.Close()
-  if _, err = f.WriteString(message); err != nil {
-    panic(err)
-  }
 }
