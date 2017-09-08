@@ -11,6 +11,8 @@ import (
   "time"
 )
 
+// *****Attention, see directory creation requirements*****
+
 // TODO compare current method of getting file to just using os.Open
 
 type my_packet struct {
@@ -50,6 +52,7 @@ func main() {
 
 }
 
+// Send a packet to the server
 func dial_server_packet(packet my_packet) {
   conn, err := net.Dial("tcp", "127.0.0.1:8081")
 
@@ -68,6 +71,7 @@ func dial_server_packet(packet my_packet) {
 
 }
 
+// Create a packet to be sent to the server
 func form_packet(message, commands, file_path string) my_packet {
   current_time := time.Now().Format(time.RFC3339)
 
@@ -108,6 +112,7 @@ func form_packet(message, commands, file_path string) my_packet {
 
 }
 
+// Get a file and the file permissions
 func get_file_and_permissions(file_path string) (uint, []byte) {
   if !check_for_file(file_path) { return 0, nil }
 
@@ -122,6 +127,8 @@ func get_file_and_permissions(file_path string) (uint, []byte) {
   return mode, file_text
 }
 
+
+// Used for error checking/logging
 func check_err(err error, message string) {
     if err != nil {
       panic(err)
@@ -131,6 +138,7 @@ func check_err(err error, message string) {
     }
 }
 
+// Check if a directory exists
 func check_for_dir(file_path string) bool {
   finfo, err := os.Stat(file_path)
   if err != nil {
@@ -142,6 +150,7 @@ func check_for_dir(file_path string) bool {
   return false
 }
 
+// Check if a file exists
 func check_for_file(file_path string) bool {
   finfo, err := os.Stat(file_path)
   if err != nil {

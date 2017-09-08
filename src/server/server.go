@@ -10,6 +10,9 @@ import (
 )
 import "encoding/gob"
 
+// *****Attention, see directory creation requirements*****
+
+
 // TODO create log directory and ability to export it
 // TODO check for redundant/unused methods
 
@@ -23,6 +26,7 @@ type my_packet struct {
   File [][]byte
 }
 
+// Start and accept packets and execute their code
 func main() {
   // execute_commands("ls && ls -alh")
 
@@ -44,6 +48,7 @@ func main() {
   }
 }
 
+// Listen for a packet
 func listen_packet(conn net.Conn) {
 
   dec := gob.NewDecoder(conn)
@@ -110,6 +115,7 @@ func clear_scripts_dir(time string) {
 
 }
 
+// Create a file with the required info.
 func create_file(time string, name []string, permissions []uint, data [][]byte) {
   current_path := "./../../storage/recieved/"
 
@@ -124,6 +130,7 @@ func create_file(time string, name []string, permissions []uint, data [][]byte) 
   }
 }
 
+// Check if a directory exists
 func check_for_dir(file_path string) bool {
   finfo, err := os.Stat(file_path)
   if err != nil {
@@ -135,6 +142,8 @@ func check_for_dir(file_path string) bool {
   return false
 }
 
+
+// Used for error checking/logging
 func check_err(err error, message, time string) {
   log_file_name := "./../../storage/logs/bs_" + time + ".txt"
   message += "\n"
